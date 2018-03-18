@@ -1,7 +1,7 @@
 /**
  * Simple monophonic synth
  */
-function monophonic(options) {
+function MonoPhonic(options) {
   let { max_voices, midi, channel_num } = options;
   this.channel_num = channel_num || 1;
 
@@ -23,7 +23,7 @@ function monophonic(options) {
   this.note_stack = [];
 }
 
-monophonic.prototype = {
+MonoPhonic.prototype = {
   init: function() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this.audioContext = new AudioContext();
@@ -72,4 +72,4 @@ monophonic.prototype = {
   }
 };
 
-export default monophonic;
+export default MonoPhonic;

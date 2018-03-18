@@ -3,7 +3,7 @@
  * options:
  *  channel_num - MIDI channel number
  */
-function monitor(options) {
+function Monitor(options) {
   const { display_container_id } = options;
   this.display_container_id = display_container_id || "monitor";
 
@@ -28,7 +28,7 @@ function monitor(options) {
   */
 }
 
-monitor.prototype = {
+Monitor.prototype = {
   init: function() {
     this.display_container = document.getElementById(this.display_container_id);
   },
@@ -87,4 +87,4 @@ monitor.prototype = {
   }
 };
 
-export default monitor;
+export default Monitor;
