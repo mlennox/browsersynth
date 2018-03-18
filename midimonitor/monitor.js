@@ -4,7 +4,7 @@
  *  channel_num - MIDI channel number
  */
 function Monitor(options) {
-  const { display_container_id } = options;
+  const { display_container_id } = options || {};
   this.display_container_id = display_container_id || "monitor";
 
   this.init();

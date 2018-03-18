@@ -1,1 +1,1 @@
-./node_modules/.bin/live-server --cors
+./node_modules/.bin/live-server --cors --ignore="\.git/**/*.*"

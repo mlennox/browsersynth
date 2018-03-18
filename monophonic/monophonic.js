@@ -2,14 +2,16 @@
  * Simple monophonic synth
  */
 function MonoPhonic(options) {
-  let { max_voices, midi, channel_num } = options;
+  let { midi, channel_num, monitor } = options;
   this.channel_num = channel_num || 1;
 
   this.midi = midi;
   this.midi.plugIn(
     {
+      // NOTE : using arrow functions here will preserve the context
       noteOn: (note, velocity) => this.noteOn(note, velocity),
-      noteOff: (note, velocity) => this.noteOff(note, velocity)
+      noteOff: (note, velocity) => this.noteOff(note, velocity),
+      monitor: message_details => monitor.handleMessage(message_details)
     },
     this.channel_num
   );

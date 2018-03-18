@@ -1,5 +1,6 @@
 import MonoPhonic from "./monophonic.js";
-import MIDI from "./midi.js";
+import MIDI from "../common/midi.js";
+import Monitor from "../midimonitor/monitor.js";
 
 document.addEventListener("DOMContentLoaded", function() {
   if (
@@ -7,6 +8,9 @@ document.addEventListener("DOMContentLoaded", function() {
     document.readyState === "complete"
   ) {
     let midi = new MIDI();
-    new MonoPhonic({ max_voices: 1, midi });
+    new MonoPhonic({
+      midi,
+      monitor: new Monitor()
+    });
   }
 });
