@@ -34,6 +34,7 @@ MonoPhonic.prototype = {
     this.envelope = this.audioContext.createGain();
     this.oscillator.connect(this.envelope);
     this.envelope.connect(this.audioContext.destination);
+    // https://www.chromestatus.com/features/5287995770929152
     this.envelope.gain.value = 0.0;
     this.oscillator.start(0);
   },
