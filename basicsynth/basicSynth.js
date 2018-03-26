@@ -70,24 +70,52 @@ BasicSynth.prototype = {
       const voice = this.voices[voice_index];
       if (voice.note) {
         // as we may be voice stealing lets shut down the old voice
+        this.liberateVoice({ note, voice_index });
+        this.playNote(voice_index, note, velocity);
       } else {
-        voice.note = note;
-        voice.oscillator.frequency.setTargetAtTime(
-          this.midiNoteToFrequency(note),
-          0,
-          0
-        );
-        voice.volume.gain.linearRampToValueAtTime(
-          1.0 * (velocity / 127),
-          this.audioContext.currentTime + this.envelope.attack
-        );
+        // ok, there is a free voice
+        this.playNote(voice_index, note, velocity);
       }
+    }
+  },
+  playNote: function(voice_index, note, velocity) {
+    const voice = this.voices[voice_index];
+    voice.note = note;
+    voice.oscillator.frequency.setTargetAtTime(
+      this.midiNoteToFrequency(note),
+      0,
+      0
+    );
+    voice.volume.gain.linearRampToValueAtTime(
+      1.0 * (velocity / 127),
+      this.audioContext.currentTime + this.envelope.attack
+    );
+  },
+  liberateVoice: function(options) {
+    const { note, voice_index } = options;
+    // if voice index passed then check if the note matches
+    // if both match then free the voice
+    // if current note for voice does not match then assume it has been stolen meantime
+    // if only note passed then find the index and free the note
+    // let voice_index = this.voices.findIndex(voice => voice.note === note);
+
+    if (
+      voice_index &&
+      (voice_index >= 0 || voice_index <= this.max_voices) &&
+      this.voices[voice_index].note === note
+    ) {
+      const voice = this.voices[voice_index];
+      voice.note = null;
+      voice.volume.gain.setTargetAtTime(0, this.audioContext.currentTime);
+      this.voice_stack;
+    }
+    if (!voice_index && note) {
     }
   },
   init: function() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this.audioContext = new AudioContext();
-    this.voices = [...generateVoices(this.audioContext)];
+    this.voices = [...this.generateVoices(this.audioContext)];
   },
   midiNoteToFrequency: function(note) {
     // https://newt.phys.unsw.edu.au/jw/notes.html
@@ -95,43 +123,31 @@ BasicSynth.prototype = {
   },
   noteOn: function(note, velocity) {
     console.log("note on", note, velocity);
-    // check if note is already playing
-    //    if so change velocity
-    //    if not assign a voice and start note
-    //        if no free voices then steal oldest voice
-
-    this.note_stack.push(note);
-    this.oscillator.frequency.cancelScheduledValues(0);
-    this.oscillator.frequency.setTargetAtTime(
-      this.midiNoteToFrequency(note),
-      0,
-      this.portamento
-    );
-    this.envelope.gain.cancelScheduledValues(0);
-    this.envelope.gain.setTargetAtTime(1.0 * velocity / 127, 0, this.attack);
+    this.assignOrUpdateVoice(note, velocity);
   },
   noteOff: function(note, velocity) {
     console.log("note off", note, velocity);
     // check if note is already playing
     //    if so stop it and free the voice
     //    if not then ignore!
+    this.liberateVoice({ note });
 
-    var position = this.note_stack.indexOf(note);
-    if (position != -1) {
-      this.note_stack.splice(position, 1);
-    }
-    if (this.note_stack.length == 0) {
-      // shut off the envelope
-      this.envelope.gain.cancelScheduledValues(0);
-      this.envelope.gain.setTargetAtTime(0.0, 0, this.release);
-    } else {
-      this.oscillator.frequency.cancelScheduledValues(0);
-      this.oscillator.frequency.setTargetAtTime(
-        this.midiNoteToFrequency(this.note_stack[this.note_stack.length - 1]),
-        0,
-        this.portamento
-      );
-    }
+    // var position = this.note_stack.indexOf(note);
+    // if (position != -1) {
+    //   this.note_stack.splice(position, 1);
+    // }
+    // if (this.note_stack.length == 0) {
+    //   // shut off the envelope
+    //   this.envelope.gain.cancelScheduledValues(0);
+    //   this.envelope.gain.setTargetAtTime(0.0, 0, this.release);
+    // } else {
+    //   this.oscillator.frequency.cancelScheduledValues(0);
+    //   this.oscillator.frequency.setTargetAtTime(
+    //     this.midiNoteToFrequency(this.note_stack[this.note_stack.length - 1]),
+    //     0,
+    //     this.portamento
+    //   );
+    // }
   }
 };
 
