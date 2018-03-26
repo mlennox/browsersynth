@@ -17,6 +17,14 @@ npm install
 
 Your browser should now open on `localhost:8080` and display a set of links to the various demos
 
+### Testing
+
+Built using `Jest` so just run
+
+```bash
+npm test
+```
+
 ## Disclaimer
 
 The code is written to support ES6 modules and the Web and MIDI API currently available in Chrome 64+.
