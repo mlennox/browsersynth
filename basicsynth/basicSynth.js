@@ -2,16 +2,18 @@
  * Basic synth
  */
 function BasicSynth(options) {
-  let { max_voices, midi, channel_num, monitor } = options;
+  let { max_voices, midi, channel_num, monitor, ctx, voiceManager } =
+    options || {};
+  if (!ctx || !voiceManager || !midi) {
+    throw new Error(
+      "You must supply the following params : ctx, voiceManager, midi"
+    );
+  }
+  this.ctx = ctx;
+  this.voiceManager = voiceManager;
   this.channel_num = channel_num || 1;
   this.max_voices = max_voices || 4;
   this.voices = [];
-  /**
-   * voice_stack tracks the index of voices in use
-   * when a voice hits noteOff then it is added to top of stack
-   * to assign a new voice take from top of stack (always oldest or free) and move to bottom of stack
-   */
-  this.voice_stack = [];
 
   // eventually will pass in these values, and even control them
   this.type = "sine";
@@ -38,13 +40,42 @@ function BasicSynth(options) {
 }
 
 BasicSynth.prototype = {
+  init: function() {
+    this.audioContext =
+      this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    this.voices = [...this.generateVoices(this.audioContext)];
+  },
+  /**
+   * Maybe the voices object should be able to clean up noteOn and noteOff assigning to voice stack?
+   */
   generateVoices: function*(ctx) {
     let voice_count = 0;
     while (voice_count < this.max_voices) {
       voice_count++;
       const voice = {
         oscillator: ctx.createOscillator(),
-        volume: ctx.createGain()
+        volume: ctx.createGain(),
+        steal: () => {
+          // we will ramp down the voice volume quickly
+        },
+        noteOff: () => {
+          // could do some ADSR stuff here
+        },
+        noteOn: (note, velocity) => {
+          // TODO: we need to have the synth context here too
+          //    - this.ctx
+          //    - this.envelope
+          //    - etc.
+          // this.oscillator.frequency.setTargetAtTime(
+          //   this.midiNoteToFrequency(note),
+          //   0,
+          //   0
+          // );
+          // this.volume.gain.linearRampToValueAtTime(
+          //   1.0 * (velocity / 127),
+          //   this.audioContext.currentTime + this.envelope.attack
+          // );
+        }
       };
       voice.oscillator.connect(voice.volume);
       voice.volume.connect(ctx.destination);
@@ -57,26 +88,37 @@ BasicSynth.prototype = {
    */
   assignOrUpdateVoice: function(note, velocity) {
     let voice_index = this.voices.findIndex(voice => voice.note === note);
-    if (voice_index) {
-      this.voices[voice_index].volume.gain.linearRampToValueAtTime(
-        1.0 * (velocity / 127),
-        this.audioContext.currentTime + this.envelope.attack
-      );
+    console.log("- - - - - next voice index", voice_index);
+    if (voice_index === -1) {
+      // we'll need a voice for the new note
+      // are there any free voices
+      // if yes, assign
+      // if no, find oldest note, kill it and assign (use setValueAtTime)
     } else {
-      // pull a new voice from the top of the stack
-      voice_index = this.voice_stack.shift();
-      // now push it to the bottom
-      this.voice_stack.push(voice_index);
-      const voice = this.voices[voice_index];
-      if (voice.note) {
-        // as we may be voice stealing lets shut down the old voice
-        this.liberateVoice({ note, voice_index });
-        this.playNote(voice_index, note, velocity);
-      } else {
-        // ok, there is a free voice
-        this.playNote(voice_index, note, velocity);
-      }
+      // update the velocity or whatever
     }
+    // if (voice_index > -1) {
+    //   this.voices[voice_index].volume.gain.linearRampToValueAtTime(
+    //     1.0 * (velocity / 127),
+    //     this.audioContext.currentTime + this.envelope.attack
+    //   );
+    // } else {
+    //   // pull a new voice from the top of the stack
+    //   // or if no voices then use the first voice
+    //   voice_index = this.voice_stack.shift() || 0;
+    //   console.log("voice index", voice_index, "voice stack", this.voice_stack);
+    //   // now push it to the bottom
+    //   this.voice_stack.push(voice_index);
+    //   const voice = this.voices[voice_index];
+    //   if (voice.note) {
+    //     // as we may be voice stealing lets shut down the old voice
+    //     this.liberateVoice({ note, voice_index });
+    //     this.playNote(voice_index, note, velocity);
+    //   } else {
+    //     // ok, there is a free voice
+    //     this.playNote(voice_index, note, velocity);
+    //   }
+    // }
   },
   playNote: function(voice_index, note, velocity) {
     const voice = this.voices[voice_index];
@@ -112,11 +154,7 @@ BasicSynth.prototype = {
     if (!voice_index && note) {
     }
   },
-  init: function() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    this.audioContext = new AudioContext();
-    this.voices = [...this.generateVoices(this.audioContext)];
-  },
+
   midiNoteToFrequency: function(note) {
     // https://newt.phys.unsw.edu.au/jw/notes.html
     return Math.pow(2, (note - 69) / 12) * 440;

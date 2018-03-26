@@ -4,18 +4,15 @@
   "description": "Exploring Web MIDI and Audio APIs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint src/**",
+    "test": "jest .",
+    "coverage": "jest --collectCoverageFrom=src/**.js --coverage src"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mlennox/browsersynth.git"
   },
-  "keywords": [
-    "web",
-    "audio",
-    "midi",
-    "synth"
-  ],
+  "keywords": ["web", "audio", "midi", "synth"],
   "author": "Mark Lennox",
   "license": "MIT",
   "bugs": {
@@ -23,6 +20,17 @@
   },
   "homepage": "https://github.com/mlennox/browsersynth#readme",
   "devDependencies": {
-    "live-server": "^1.2.0"
+    "babel-core": "6.26.0",
+    "babel-jest": "22.4.3",
+    "babel-preset-env": "1.6.1",
+    "eslint": "4.19.1",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-plugin-import": "2.9.0",
+    "jest": "22.4.3",
+    "live-server": "1.2.0",
+    "regenerator-runtime": "0.11.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
