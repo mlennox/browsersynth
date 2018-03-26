@@ -29,25 +29,25 @@ describe("voice manager", () => {
     vm = new VoiceManager({ voices: voices_mock, ctx: ctx_mock });
   });
 
-  // describe("assign voices", () => {
-  //   it("no voices sounding new voice assigned to lowest available", () => {
-  //     const stackAfter = [{ note: 10, time: 1000 }, undefined];
-  //     vm.voice_index_free = 0;
-  //     vm.note_AddOrUpdate(10, 100);
-  //     expect(vm.voice_stack).toEqual(stackAfter);
-  //   });
+  describe("assign voices", () => {
+    it("no voices sounding new voice assigned to lowest available", () => {
+      const stackAfter = [{ note: 10, time: 1000 }, undefined];
+      vm.voice_index_free = 0;
+      vm.note_AddOrUpdate(10, 100);
+      expect(vm.voice_stack).toEqual(stackAfter);
+    });
 
-  //   it("one voice free, new voice assigned to free slot", () => {
-  //     const stackBefore = [null, { note: 9, time: 900 }];
-  //     const stackAfter = [{ note: 10, time: 1000 }, { note: 9, time: 900 }];
-  //     vm.voice_stack = stackBefore;
-  //     vm.voice_index_free = 0;
-  //     vm.note_AddOrUpdate(10, 100);
-  //     expect(vm.voice_stack).toEqual(stackAfter);
-  //     expect(vm.voice_index_free).toEqual(1);
-  //     expect(vm.voice_memo).toEqual({ "10": 0 });
-  //   });
-  // });
+    it("one voice free, new voice assigned to free slot", () => {
+      const stackBefore = [null, { note: 9, time: 900 }];
+      const stackAfter = [{ note: 10, time: 1000 }, { note: 9, time: 900 }];
+      vm.voice_stack = stackBefore;
+      vm.voice_index_free = 0;
+      vm.note_AddOrUpdate(10, 100);
+      expect(vm.voice_stack).toEqual(stackAfter);
+      expect(vm.voice_index_free).toEqual(1);
+      expect(vm.voice_memo).toEqual({ "10": 0 });
+    });
+  });
 
   describe("getNextFree", () => {
     it("first index returned from empty stack", () => {
