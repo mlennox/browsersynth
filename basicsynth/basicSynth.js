@@ -55,8 +55,12 @@ BasicSynth.prototype = {
       const voice = {
         oscillator: ctx.createOscillator(),
         volume: ctx.createGain(),
-        steal: () => {
+        steal: (note, velocity) => {
           // we will ramp down the voice volume quickly
+          // and then play the new note - if passed
+          if (note) {
+            this.noteOn(note, velocity);
+          }
         },
         noteOff: () => {
           // could do some ADSR stuff here
@@ -75,6 +79,9 @@ BasicSynth.prototype = {
           //   1.0 * (velocity / 127),
           //   this.audioContext.currentTime + this.envelope.attack
           // );
+        },
+        polyPress: (note, velocity) => {
+          // adjust the velocity
         }
       };
       voice.oscillator.connect(voice.volume);

@@ -28,26 +28,24 @@ voiceManager.prototype = {
   note_AddOrUpdate: function(note, velocity) {
     let voice_index = this.voice_memo[note];
     if (voice_index) {
-      // we update it
+      // I guess we get here by poly pressure?
+      this.voices[voice_index].polyPress(note, velocity);
     } else {
-      // find next available
-      // add note and index to voice_memo
-      // ramp down voice
-      // set new voice
-      const now = this.ctx.currentTime;
+      // find the voice and play the note
       voice_index = this.voice_index_free;
+      this.voices[voice_index].steal(note, velocity);
+      // and now the note is playing, update tracking details
+      const now = this.ctx.currentTime;
       this.voice_stack[voice_index] = { note, time: now };
       this.voice_memo[note] = voice_index;
-      // start the note here
-      // find the next free or oldest
-      this.voice_index_free = this.getNextFree();
+      this.voice_index_free = this.getNextFree(now);
     }
   },
   /**
    * Return the first free index or the oldest playing note
    */
-  getNextFree: function() {
-    let max = this.ctx.currentTime;
+  getNextFree: function(now) {
+    let max = now || this.ctx.currentTime;
     let freeIndex = -1;
     for (let index = 0; index < this.voice_stack.length; index++) {
       const voice = this.voice_stack[index];
@@ -62,7 +60,9 @@ voiceManager.prototype = {
     }
     return freeIndex;
   },
-  note_Liberate: function() {}
+  note_Liberate: function(note) {
+    //
+  }
 };
 
 export default voiceManager;

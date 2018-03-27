@@ -4,9 +4,6 @@ describe("voice manager", () => {
   let vm, voices_mock, ctx_mock;
 
   beforeAll(() => {
-    ctx_mock = {
-      currentTime: 1000
-    };
     voices_mock = [
       {
         oscillator: () => {},
@@ -26,13 +23,20 @@ describe("voice manager", () => {
   });
 
   beforeEach(() => {
+    ctx_mock = {
+      timestamp: 999,
+      get currentTime() {
+        this.timestamp++;
+        return this.timestamp;
+      }
+    };
     vm = new VoiceManager({ voices: voices_mock, ctx: ctx_mock });
   });
 
   describe("assign voices", () => {
     it("no voices sounding new voice assigned to lowest available", () => {
       const stackAfter = [{ note: 10, time: 1000 }, undefined];
-      vm.voice_index_free = 0;
+      vm.voice_index_free = vm.getNextFree();
       vm.note_AddOrUpdate(10, 100);
       expect(vm.voice_stack).toEqual(stackAfter);
     });
@@ -41,11 +45,36 @@ describe("voice manager", () => {
       const stackBefore = [null, { note: 9, time: 900 }];
       const stackAfter = [{ note: 10, time: 1000 }, { note: 9, time: 900 }];
       vm.voice_stack = stackBefore;
-      vm.voice_index_free = 0;
+      vm.voice_index_free = vm.getNextFree();
       vm.note_AddOrUpdate(10, 100);
       expect(vm.voice_stack).toEqual(stackAfter);
       expect(vm.voice_index_free).toEqual(1);
       expect(vm.voice_memo).toEqual({ "10": 0 });
+    });
+
+    it("all voices sounding, new voice assigned to oldest", () => {
+      const stackBefore = [
+        { note: 12, time: 800 },
+        { note: 20, time: 910 },
+        { note: 19, time: 900 },
+        { note: 15, time: 760 }
+      ];
+      const stackAfter = [
+        { note: 12, time: 800 },
+        { note: 20, time: 910 },
+        { note: 19, time: 900 },
+        { note: 10, time: 1000 }
+      ];
+      vm.voice_stack = stackBefore;
+      vm.voice_index_free = vm.getNextFree();
+      vm.note_AddOrUpdate(10, 100);
+      expect(vm.voice_stack).toEqual(stackAfter);
+      expect(vm.voice_index_free).toEqual(0);
+      expect(vm.voice_memo).toEqual({ "10": 3 });
+    });
+
+    it("all voices sounding, a few new voices added in correct places", () => {
+      // todo
     });
   });
 
