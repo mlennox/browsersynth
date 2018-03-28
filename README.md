@@ -25,6 +25,45 @@ Built using `Jest` so just run
 npm test
 ```
 
+## Goal
+
+To create a basic synth framework
+
+To use a synth, you would initialise a midi receiver
+
+```js
+const midi = new MIDI({
+  channels: {
+    "1": new monophonic({ monitor: new Monitor({ display_container_id: "channelOne" }), mapMidiControlsToSynthControlsEtc })
+    "2": new BasicSynth() // you don't actually need to pass in a monitor
+  },
+  // what other options might we pass in?
+});
+//midi should now be receiving messages and the synths should be ready to play
+```
+
+Inside midi init/constructor it will run through the channels object, init the synth and connect the handlers
+
+```js
+for (const [channel, synth] of Object.entries(this.channels)) {
+  this.plugIn(synth.init(), channel);
+}
+```
+
+Each synth should use a synth prototype
+
+```js
+function Synth() {
+
+}
+
+Synth.prototype = {
+
+}
+
+export
+```
+
 ## Disclaimer
 
 The code is written to support ES6 modules and the Web and MIDI API currently available in Chrome 64+.

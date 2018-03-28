@@ -1,4 +1,4 @@
-function voiceManager(options) {
+function VoiceManager(options) {
   const { voices, ctx } = options || {};
   if (!voices || (voices && voices.length === 0) || !ctx) {
     throw new Error("you must supply voices and ctx AudioContext");
@@ -24,7 +24,7 @@ function voiceManager(options) {
   this.voice_memo = {};
 }
 
-voiceManager.prototype = {
+VoiceManager.prototype = {
   note_AddOrUpdate: function(note, velocity) {
     let voice_index = this.voice_memo[note];
     if (voice_index !== undefined && voice_index !== null) {
@@ -70,4 +70,4 @@ voiceManager.prototype = {
   }
 };
 
-export default voiceManager;
+export { VoiceManager };

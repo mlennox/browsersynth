@@ -1,4 +1,4 @@
-import VoiceManager from "./voiceManager";
+import { VoiceManager } from "./voiceManager";
 
 describe("voice manager", () => {
   let vm, voices_mock, ctx_mock;
