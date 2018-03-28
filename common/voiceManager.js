@@ -27,7 +27,7 @@ function voiceManager(options) {
 voiceManager.prototype = {
   note_AddOrUpdate: function(note, velocity) {
     let voice_index = this.voice_memo[note];
-    if (voice_index) {
+    if (voice_index !== undefined && voice_index !== null) {
       // I guess we get here by poly pressure?
       this.voices[voice_index].polyPress(note, velocity);
     } else {
@@ -61,7 +61,12 @@ voiceManager.prototype = {
     return freeIndex;
   },
   note_Liberate: function(note) {
-    //
+    let voice_index = this.voice_memo[note];
+    if (voice_index !== undefined && voice_index !== null) {
+      this.voices[voice_index].noteOff();
+      this.voice_stack[voice_index] = null;
+      this.voice_memo[note] = null;
+    }
   }
 };
 

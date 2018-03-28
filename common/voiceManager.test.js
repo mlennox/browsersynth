@@ -10,28 +10,32 @@ describe("voice manager", () => {
         volume: () => {},
         steal: () => {},
         noteOff: () => {},
-        noteOn: (note, velocity) => {}
+        noteOn: (note, velocity) => {},
+        polyPress: (note, velocity) => {}
       },
       {
         oscillator: () => {},
         volume: () => {},
         steal: () => {},
         noteOff: () => {},
-        noteOn: (note, velocity) => {}
+        noteOn: (note, velocity) => {},
+        polyPress: (note, velocity) => {}
       },
       {
         oscillator: () => {},
         volume: () => {},
         steal: () => {},
         noteOff: () => {},
-        noteOn: (note, velocity) => {}
+        noteOn: (note, velocity) => {},
+        polyPress: (note, velocity) => {}
       },
       {
         oscillator: () => {},
         volume: () => {},
         steal: () => {},
         noteOff: () => {},
-        noteOn: (note, velocity) => {}
+        noteOn: (note, velocity) => {},
+        polyPress: (note, velocity) => {}
       }
     ];
   });
@@ -137,6 +141,8 @@ describe("voice manager", () => {
       expect(vm.voice_index_free).toEqual(expected_free_index);
       expect(vm.voice_memo).toEqual({ "10": 3, "12": 0, "15": 2, "30": 1 });
     });
+
+    // TODO : test if voice steal / noteon called
   });
 
   describe("getNextFree", () => {
@@ -164,6 +170,38 @@ describe("voice manager", () => {
       ];
       const freeIndex = vm.getNextFree();
       expect(freeIndex).toEqual(1);
+    });
+  });
+
+  describe("note_Liberate", () => {
+    it("note to be liberated is not in voice stack", () => {
+      const stack_before = [{ note: 12, time: 800 }, { note: 20, time: 910 }];
+      const voice_memo = { "12": 0, "20": 1 };
+      vm.voice_stack = stack_before;
+      vm.voice_memo = voice_memo;
+
+      vm.note_Liberate(80);
+
+      expect(vm.voice_stack).toEqual(stack_before);
+    });
+    it("note to be liberated should be removed from stack", () => {
+      const stack_before = [{ note: 12, time: 800 }, { note: 20, time: 910 }];
+      const stack_after = [null, { note: 20, time: 910 }];
+      const voice_memo = { "12": 0, "20": 1 };
+      vm.voice_stack = stack_before;
+      vm.voice_memo = voice_memo;
+
+      vm.note_Liberate(12);
+
+      expect(vm.voice_stack).toEqual(stack_before);
+    });
+    it("when note liberated noteOff is called", () => {
+      const noteOffSpy = jest.spyOn(voices_mock[0], "noteOff");
+
+      vm.note_AddOrUpdate(12, 100);
+      vm.note_Liberate(12);
+
+      expect(noteOffSpy).toHaveBeenCalled();
     });
   });
 });
