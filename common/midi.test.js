@@ -1,11 +1,19 @@
-import blug, { MIDI } from "./midi";
+import { MIDI } from "./midi";
 
-let synth_mock, handlers_mock;
+let midi, synth_mock, handlers_mock;
 
 describe("midi", () => {
   beforeEach(() => {
     handlers_mock = {
-      noteOn: () => {}
+      noteOff: test_param => {
+        return test_param;
+      },
+      noteOn: () => {},
+      polyPress: () => {},
+      controlChange: () => {},
+      programChange: () => {},
+      pitchBend: () => {},
+      monitor: () => {}
     };
     synth_mock = {
       init: () => {
@@ -29,9 +37,21 @@ describe("midi", () => {
 
       expect(plugInSpy).toBeCalledWith("1", synth_mock);
     });
+  });
 
-    it("", () => {
-      //
+  describe("plugIn", () => {
+    it("channel_handlers assigned", () => {
+      midi.plugIn(1, synth_mock);
+      expect(midi.channel_handlers[1]).not.toBeNull();
+    });
+
+    it("handlers are properly assigned", () => {
+      midi.plugIn(1, synth_mock);
+
+      const expected = "expected message";
+      const result = midi.channel_handlers[1].noteOff(expected);
+
+      expect(result).toEqual(expected);
     });
   });
 });
