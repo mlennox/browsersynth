@@ -1,9 +1,17 @@
 import { MIDI } from "./midi";
 
-let midi, synth_mock, handlers_mock;
+let midi, synth_mock, handlers_mock, browser_api, promise_mock;
 
 describe("midi", () => {
   beforeEach(() => {
+    promise_mock = {
+      then: thenHandler => {
+        thenHandler();
+        return {
+          catch: catchHandler => catchHandler()
+        };
+      }
+    };
     handlers_mock = {
       noteOff: test_param => {
         return test_param;
@@ -15,6 +23,11 @@ describe("midi", () => {
       pitchBend: () => {},
       monitor: () => {}
     };
+    browser_api = {
+      requestMIDIAccess: () => {
+        return promise_mock;
+      }
+    };
     synth_mock = {
       init: () => {
         return handlers_mock;
@@ -24,9 +37,9 @@ describe("midi", () => {
       channels: {
         "1": synth_mock
       },
+      browser_api,
       delay_init: true // smelly, just for testing at this time...
     });
-    // console.log("= = = =", midi);
   });
 
   describe("init", () => {
@@ -36,6 +49,13 @@ describe("midi", () => {
       midi.init();
 
       expect(plugInSpy).toBeCalledWith("1", synth_mock);
+    });
+    it("calls requestAccess to connect to MIDI", () => {
+      const accessSpy = jest.spyOn(midi, "requestAccess");
+
+      midi.init();
+
+      expect(accessSpy).toBeCalled();
     });
   });
 
@@ -53,5 +73,12 @@ describe("midi", () => {
 
       expect(result).toEqual(expected);
     });
+  });
+
+  /**
+   * Tests setting up the connection to the Web MIDI API
+   */
+  describe("requestAccess", () => {
+    it("call requestMIDIAccess", () => {});
   });
 });

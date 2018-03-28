@@ -1,12 +1,13 @@
 // MIDI interface - start here!
 
 function MIDI(options) {
-  const { channels, delay_init } = options || {};
+  const { channels, delay_init, browser_api } = options || {};
   if (!channels || channels.length === 0) {
     throw new Error("you need to provide some synths!");
   }
   this.channels = channels;
   this.channel_handlers = {};
+  this.browser_api = browser_api || navigator;
   this.default_channel_handler = {
     noteOn: () => {},
     noteOff: () => {},
@@ -26,6 +27,7 @@ MIDI.prototype = {
     for (const [channel, synth] of Object.entries(this.channels)) {
       this.plugIn(channel, synth);
     }
+    this.requestAccess();
   },
   plugIn: function(channel_num, synth) {
     const handlers = synth.init();
@@ -43,12 +45,15 @@ MIDI.prototype = {
     }
 
     this.channel_handlers[channel_num] = new_handlers;
-    // console.log(
-    //   "- - - - handlers",
-    //   this.channel_handlers[channel_num],
-    //   channel_num
-    // );
-  }
+  },
+  requestAccess: function() {
+    this.browser_api
+      .requestMIDIAccess()
+      .then(access => this.accessSuccess(access))
+      .catch(err => this.accessFailure(err));
+  },
+  accessSuccess: () => {},
+  accessFailure: () => {}
 };
 
 export { MIDI };
