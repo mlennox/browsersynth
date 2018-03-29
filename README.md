@@ -6,6 +6,8 @@ The goal is to investigate the Web MIDI and Audio APIs by building a MIDI interf
 
 I'll probably throw in a sequencer too.
 
+[![CircleCI](https://circleci.com/gh/mlennox/browsersynth.svg?style=svg)](https://circleci.com/gh/mlennox/browsersynth)
+
 ## Running the examples
 
 You'll need an up to date installation of Nodejs (I recommend using nvm to manage versions). To get the examples running in your browser run the following in the root folder of this repo once you have cloned it to your local machine.
