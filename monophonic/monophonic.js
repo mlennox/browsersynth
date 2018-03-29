@@ -2,22 +2,9 @@
  * Simple monophonic synth
  */
 function MonoPhonic(options) {
-  let { midi, channel_num, monitor } = options;
-  this.channel_num = channel_num || 1;
+  let { monitor } = options;
 
-  this.midi = midi;
-  this.midi.plugIn(
-    {
-      // NOTE : using arrow functions here will preserve the context
-      noteOn: (note, velocity) => this.noteOn(note, velocity),
-      noteOff: (note, velocity) => this.noteOff(note, velocity),
-      monitor: message_details => monitor.handleMessage(message_details)
-    },
-    this.channel_num
-  );
-  this.midi.requestAccess();
-
-  this.init();
+  this.monitor = monitor;
 
   this.portamento = 0.05;
   this.attack = 0.05;
@@ -37,6 +24,12 @@ MonoPhonic.prototype = {
     // https://www.chromestatus.com/features/5287995770929152
     this.envelope.gain.value = 0.0;
     this.oscillator.start(0);
+
+    return {
+      noteOn: (note, velocity) => this.noteOn(note, velocity),
+      noteOff: (note, velocity) => this.noteOff(note, velocity),
+      monitor: message => this.monitor.init().monitor(message)
+    };
   },
   // https://newt.phys.unsw.edu.au/jw/notes.html
   midiNoteToFrequency: function(note) {
