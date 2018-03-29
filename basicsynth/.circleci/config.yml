@@ -5,11 +5,8 @@
 version: 2
 jobs:
   build:
-    # docker:
-    #   - image: node:8.0
-    machine:
-      node:
-        version: 8.4.0
+    docker:
+      - image: circleci/node:8.10.0-browsers
 
     steps:
       - checkout
