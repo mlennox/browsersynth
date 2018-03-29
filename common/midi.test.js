@@ -130,7 +130,9 @@ describe("midi", () => {
     it("each device onmidimessage handler is wired up", () => {
       midi.accessSuccess(access_mock);
 
-      const result = midi.access.inputs.values()[0].onmidimessage();
+      const result = midi.access.inputs
+        .values()[0]
+        .onmidimessage({ data: [1, 2, 3] });
 
       expect(result).not.toEqual("on midi message handler");
     });
@@ -138,9 +140,54 @@ describe("midi", () => {
     it("access onstatechange handler is wired up", () => {
       midi.accessSuccess(access_mock);
 
-      const result = midi.access.onstatechange();
+      const result = midi.access.onstatechange({
+        port: {
+          name: "some name",
+          manufacturer: "some manufacturer",
+          state: "some state"
+        }
+      });
 
       expect(result).not.toEqual("on state change handler");
+    });
+  });
+
+  describe("midiMessageHandler", () => {
+    beforeEach(() => {
+      midi.channel_handlers[1] = handlers_mock;
+    });
+
+    it("noteOff message will call proper handler", () => {
+      const handlerSpy = jest.spyOn(handlers_mock, "noteOff");
+      const message = {
+        data: [0x80, 100, 0]
+      };
+
+      midi.midiMessageHandler(message);
+
+      expect(handlerSpy).toBeCalled();
+    });
+
+    it("noteOn message will call proper handler", () => {
+      const handlerSpy = jest.spyOn(handlers_mock, "noteOn");
+      const message = {
+        data: [0x90, 100, 100]
+      };
+
+      midi.midiMessageHandler(message);
+
+      expect(handlerSpy).toBeCalled();
+    });
+
+    it("noteOn message with velocity zero will call noteOff handler", () => {
+      const handlerSpy = jest.spyOn(handlers_mock, "noteOff");
+      const message = {
+        data: [0x90, 100, 0]
+      };
+
+      midi.midiMessageHandler(message);
+
+      expect(handlerSpy).toBeCalled();
     });
   });
 });

@@ -70,12 +70,49 @@ MIDI.prototype = {
     // handles connection / disconnection of devices
     this.access.onstatechange = this.stateChangeHandler;
   },
-  accessFailure: function() {},
-  stateChangeHandler: function() {
-    return "update state change";
+  accessFailure: function(err) {
+    console.log("MIDI API Access failed", err);
   },
-  midiMessageHandler: function() {
-    return "midi message";
+  stateChangeHandler: function(e) {
+    console.log(e.port.name, e.port.manufacturer, e.port.state);
+  },
+  /**
+   * Note : currently this MIDI message handler will receive all messages from all devices
+   * and not discriminate between source, but will manage MIDI channel
+   * so it could be possible to have messages arriving from different devices on the same MIDI channel
+   */
+  midiMessageHandler: function(message) {
+    console.log("MIDI message received", message.data);
+    const [cmd, byte1, byte2] = message.data;
+    // find what command we want using the MSB of the command value
+    const cmd_band = cmd & 0xf0;
+    // find the MIDI channel the command is targeting from the LSB
+    const channel_num = (cmd & 0x0f) + 1;
+    if (!this.channel_handlers.hasOwnProperty(channel_num)) {
+      console.warn(`No device mapped for MIDI channel '${channel_num}'`);
+      return;
+    }
+    const channel = this.channel_handlers[channel_num];
+    channel.monitor({ cmd, cmd_band, channel_num, byte1, byte2 });
+    switch (cmd_band) {
+      case 0x80:
+        return channel.noteOff(byte1, byte2);
+      case 0x90:
+        // if a note on command has a velocity of zero then we treat it like a note off
+        return byte2 > 0
+          ? channel.noteOn(byte1, byte2)
+          : channel.noteOff(byte1, byte2);
+      case 0xa0:
+        return channel.polyPress(byte1, byte2);
+      case 0xb0:
+        return channel.controlChange(byte1, byte2);
+      case 0xc0:
+        return channel.programChange(byte1, byte2);
+      case 0xe0:
+        return channel.pitchBend(byte1, byte2);
+      default:
+        return;
+    }
   }
 };
 
