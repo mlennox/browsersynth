@@ -71,8 +71,12 @@ MIDI.prototype = {
     this.access.onstatechange = this.stateChangeHandler;
   },
   accessFailure: function() {},
-  stateChangeHandler: function() {},
-  midiMessageHandler: function() {}
+  stateChangeHandler: function() {
+    return "update state change";
+  },
+  midiMessageHandler: function() {
+    return "midi message";
+  }
 };
 
 export { MIDI };

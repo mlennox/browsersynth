@@ -1,21 +1,46 @@
 import { MIDI } from "./midi";
 
 // ugh, Jest, why? globals upon globals...
-let midi, synth_mock, handlers_mock, browser_api, promise_mock, is_erroring;
+let midi,
+  synth_mock,
+  handlers_mock,
+  browser_api,
+  promise_mock,
+  is_erroring,
+  access_mock,
+  device_mock;
 
 describe("midi", () => {
   beforeEach(() => {
-    is_erroring: false;
-    promise_mock = {
-      then: thenHandler => {
-        if (!is_erroring) {
-          thenHandler();
-        }
-        return {
-          catch: catchHandler => catchHandler()
-        };
+    device_mock = {
+      onmidimessage: () => {
+        return "on midi message handler";
       }
     };
+    access_mock = {
+      onstatechange: () => {
+        return "on state change handler";
+      },
+      inputs: {
+        values: () => {
+          return [device_mock];
+        }
+      }
+    };
+    is_erroring = false;
+    promise_mock = (thenValue, errorValue) => {
+      return {
+        then: thenHandler => {
+          if (!is_erroring) {
+            thenHandler(thenValue);
+          }
+          return {
+            catch: catchHandler => catchHandler(errorValue)
+          };
+        }
+      };
+    };
+
     handlers_mock = {
       noteOff: test_param => {
         return test_param;
@@ -29,7 +54,7 @@ describe("midi", () => {
     };
     browser_api = {
       requestMIDIAccess: () => {
-        return promise_mock;
+        return promise_mock(access_mock, "");
       }
     };
     synth_mock = {
@@ -101,5 +126,21 @@ describe("midi", () => {
     });
   });
 
-  describe("accessSuccess", () => {});
+  describe("accessSuccess", () => {
+    it("each device onmidimessage handler is wired up", () => {
+      midi.accessSuccess(access_mock);
+
+      const result = midi.access.inputs.values()[0].onmidimessage();
+
+      expect(result).not.toEqual("on midi message handler");
+    });
+
+    it("access onstatechange handler is wired up", () => {
+      midi.accessSuccess(access_mock);
+
+      const result = midi.access.onstatechange();
+
+      expect(result).not.toEqual("on state change handler");
+    });
+  });
 });
