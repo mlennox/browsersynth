@@ -2,6 +2,7 @@
   "name": "browsersynth",
   "version": "1.0.0",
   "description": "Exploring Web MIDI and Audio APIs",
+  "engines": { "node": ">=8.4.0" },
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**",
