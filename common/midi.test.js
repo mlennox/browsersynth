@@ -1,12 +1,16 @@
 import { MIDI } from "./midi";
 
-let midi, synth_mock, handlers_mock, browser_api, promise_mock;
+// ugh, Jest, why? globals upon globals...
+let midi, synth_mock, handlers_mock, browser_api, promise_mock, is_erroring;
 
 describe("midi", () => {
   beforeEach(() => {
+    is_erroring: false;
     promise_mock = {
       then: thenHandler => {
-        thenHandler();
+        if (!is_erroring) {
+          thenHandler();
+        }
         return {
           catch: catchHandler => catchHandler()
         };
@@ -79,6 +83,21 @@ describe("midi", () => {
    * Tests setting up the connection to the Web MIDI API
    */
   describe("requestAccess", () => {
-    it("call requestMIDIAccess", () => {});
+    it("on success will call accessSuccess", () => {
+      const successSpy = jest.spyOn(midi, "accessSuccess");
+
+      midi.requestAccess();
+
+      expect(successSpy).toHaveBeenCalled();
+    });
+
+    it("on failure will call accessFailure", () => {
+      const failureSpy = jest.spyOn(midi, "accessFailure");
+
+      is_erroring = true;
+      midi.requestAccess();
+
+      expect(failureSpy).toHaveBeenCalled();
+    });
   });
 });
