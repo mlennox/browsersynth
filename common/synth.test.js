@@ -5,8 +5,6 @@ describe("synth", () => {
     // });
   });
   describe("init", () => {
-    it("works", () => {
-      //
-    });
+    it("works", () => {});
   });
 });

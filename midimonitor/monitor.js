@@ -31,6 +31,9 @@ function Monitor(options) {
 Monitor.prototype = {
   init: function() {
     this.display_container = document.getElementById(this.display_container_id);
+    return {
+      monitor: message => this.handleMessage(message)
+    };
   },
   handleMessage: function(message_details) {
     const { cmd, cmd_band, channel_num, byte1, byte2 } = message_details;
@@ -87,4 +90,4 @@ Monitor.prototype = {
   }
 };
 
-export default Monitor;
+export { Monitor };

@@ -11,5 +11,6 @@ function Synth(options) {
 Synth.prototype = {
   init: function() {
     // generates the voices
+    // returns the handlers
   }
 };
