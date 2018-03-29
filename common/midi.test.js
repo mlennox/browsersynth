@@ -100,4 +100,6 @@ describe("midi", () => {
       expect(failureSpy).toHaveBeenCalled();
     });
   });
+
+  describe("accessSuccess", () => {});
 });

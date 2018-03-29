@@ -17,6 +17,9 @@ function MIDI(options) {
     pitchBend: () => {},
     monitor: () => {}
   };
+  this.access = {}; // the access object from MIDI API
+  this.inputs = []; // the attached MIDI devices
+
   if (delay_init !== true) {
     this.init();
   }
@@ -52,8 +55,24 @@ MIDI.prototype = {
       .then(access => this.accessSuccess(access))
       .catch(err => this.accessFailure(err));
   },
-  accessSuccess: () => {},
-  accessFailure: () => {}
+  accessSuccess: function(access) {
+    console.log("MIDI API accessed");
+    this.access = access;
+    // Get lists of available MIDI controllers
+    this.inputs = this.access.inputs.values();
+    // const outputs = access.outputs.values(); // we don't use outputs yet
+
+    for (const device of this.inputs) {
+      console.log("MIDIInput : ", device);
+      device.onmidimessage = message => this.midiMessageHandler(message);
+    }
+
+    // handles connection / disconnection of devices
+    this.access.onstatechange = this.stateChangeHandler;
+  },
+  accessFailure: function() {},
+  stateChangeHandler: function() {},
+  midiMessageHandler: function() {}
 };
 
 export { MIDI };
