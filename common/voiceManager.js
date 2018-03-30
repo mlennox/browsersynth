@@ -1,17 +1,19 @@
 function VoiceManager(options) {
-  const { voices, ctx } = options || {};
-  if (!voices || (voices && voices.length === 0) || !ctx) {
-    throw new Error("you must supply voices and ctx AudioContext");
+  const { num_voices, ctx } = options || {};
+  if (!num_voices || !ctx) {
+    throw new Error(
+      "you must supply number of voices to be managed and the audio context"
+    );
   }
+  this.num_voices = num_voices;
   this.ctx = ctx;
-  this.voices = voices;
-  this.max_voices = this.voices.length;
+
   /**
    * voice_stack tracks the index of voices in use
    * when a voice hits noteOff then it is added to top of stack
    * to assign a new voice take from top of stack (always oldest or free) and move to bottom of stack
    */
-  this.voice_stack = new Array(this.max_voices);
+  this.voice_stack = new Array(this.num_voices);
   /**
    * quick ref to next free voice
    * We always set this to the next empty slot
@@ -25,21 +27,44 @@ function VoiceManager(options) {
 }
 
 VoiceManager.prototype = {
-  note_AddOrUpdate: function(note, velocity) {
+  voiceCheck: function(note, velocity) {
+    let voice_details = {
+      voice_index: this.voice_memo[note],
+      steal: false,
+      update: false
+    };
+    let update_tracking = false;
+    if (
+      voice_details.voice_index !== undefined &&
+      voice_details.voice_index !== null
+    ) {
+      // already playing, we'll tell the synth to update the velocity
+      voice_details.update = true;
+    } else {
+      // we only update tracking if a voice is assigned a new note
+      update_tracking = true;
+      // requested note not already playing - take the next free voice
+      voice_details.voice_index = this.voice_index_free;
+      // if the voice is already playing then we'll tell the synth to 'steal'
+      voice_details.steal =
+        this.voice_stack[voice_details.voice_index] !== null;
+      this.updateVoiceTracking(voice_details.voice_index, note);
+    }
+    return voice_details;
+  },
+  voiceFree: function(note) {
     let voice_index = this.voice_memo[note];
     if (voice_index !== undefined && voice_index !== null) {
-      // I guess we get here by poly pressure?
-      this.voices[voice_index].polyPress(note, velocity);
-    } else {
-      // find the voice and play the note
-      voice_index = this.voice_index_free;
-      this.voices[voice_index].steal(note, velocity);
-      // and now the note is playing, update tracking details
-      const now = this.ctx.currentTime;
-      this.voice_stack[voice_index] = { note, time: now };
-      this.voice_memo[note] = voice_index;
-      this.voice_index_free = this.getNextFree(now);
+      this.voice_stack[voice_index] = null;
+      this.voice_memo[note] = null;
     }
+  },
+  updateVoiceTracking: function(voice_index, note) {
+    // update tracking details
+    const now = this.ctx.currentTime;
+    this.voice_stack[voice_index] = { note, time: now };
+    this.voice_memo[note] = voice_index;
+    this.voice_index_free = this.getNextFree(now);
   },
   /**
    * Return the first free index or the oldest playing note
@@ -59,14 +84,6 @@ VoiceManager.prototype = {
       }
     }
     return freeIndex;
-  },
-  note_Liberate: function(note) {
-    let voice_index = this.voice_memo[note];
-    if (voice_index !== undefined && voice_index !== null) {
-      this.voices[voice_index].noteOff();
-      this.voice_stack[voice_index] = null;
-      this.voice_memo[note] = null;
-    }
   }
 };
 
