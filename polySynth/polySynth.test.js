@@ -1,3 +1,5 @@
+it("", () => {});
+
 // import BasicSynth from "./basicSynth";
 
 // let mock_param, mock_ctx, synth, midi, voiceManager_mock;

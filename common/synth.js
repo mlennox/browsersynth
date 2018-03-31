@@ -66,3 +66,5 @@ Synth.prototype = {
     }
   }
 };
+
+export { Synth };

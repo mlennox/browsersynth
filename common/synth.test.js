@@ -1,7 +1,9 @@
+import { Synth } from "./synth";
+
 describe("synth", () => {
   describe("constructor", () => {
     it("missing synthVoice", () => {
-      expect(new synth()).toThrow();
+      expect(Synth).toThrow();
     });
   });
   describe("init", () => {
