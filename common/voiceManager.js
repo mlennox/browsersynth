@@ -6,7 +6,6 @@ function VoiceManager(options) {
     );
   }
   this.num_voices = num_voices;
-  this.ctx = ctx;
 
   /**
    * voice_stack tracks the index of voices in use

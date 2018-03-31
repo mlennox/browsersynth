@@ -1,8 +1,8 @@
 describe("synth", () => {
   describe("constructor", () => {
-    // it("missing pa", () => {
-    //   //
-    // });
+    it("missing synthVoice", () => {
+      expect(new synth()).toThrow();
+    });
   });
   describe("init", () => {
     it("works", () => {});
