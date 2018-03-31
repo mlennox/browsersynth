@@ -1,6 +1,7 @@
 /**
  * Polyphonic synth
  */
-import { Synth } from "../common/synth.js";
+// import { Synth } from "../common/synth.js";
+// import {}
 
-var polySynth = new Synth();
+// var polySynth = new Synth();

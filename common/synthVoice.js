@@ -1,4 +1,5 @@
 function SynthVoice() {
+  
   return {
     // ADSR envelope - sustain is a volume level not time like the other parameters
     envelope: {
