@@ -49,6 +49,7 @@ Synth.prototype = {
   noteOff: function(note, velocity) {
     const action = this.voiceManager.voiceCheck(note);
     this.voices[action.voice_index].noteOff();
+    this.voiceManager.voiceFree(note);
   },
 
   // /**

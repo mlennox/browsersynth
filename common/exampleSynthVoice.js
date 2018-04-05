@@ -38,7 +38,8 @@ class ExampleSynthVoice {
    * @param {*} velocity
    */
   calculateVelocity(velocity) {
-    return Math.log10(velocity / 127 * 7.9 + 1);
+    return 1.0 * velocity / 127;
+    // return Math.log10(velocity / 127 * 7.9 + 1);
     // a simple liner velocity curve would be : 1.0 * velocity / 127
   }
 
