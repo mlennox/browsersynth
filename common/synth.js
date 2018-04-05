@@ -12,7 +12,6 @@ function Synth(options) {
   this.monitor = monitor;
   this.num_voices = num_voices || 4;
   this.voices = [];
-  this.synthVoice = synthVoice;
 
   this.audioContext =
     ctx || new (window.AudioContext || window.webkitAudioContext)();
@@ -22,29 +21,32 @@ function Synth(options) {
       ctx: this.audioContext,
       num_voices: this.num_voices
     });
+  this.synthVoice = synthVoice.init({ ctx: this.audioContext });
 }
 
 Synth.prototype = {
   init: function() {
     this.voices = [...this.generateVoices(this.ctx)];
     return {
-      noteOn: (note, velocity) => {
-        const action = this.voiceManager.voiceCheck(note);
-        if (action.steal) {
-          this.voices[action.voice_index].steal(note, velocity);
-        } else if (action.update) {
-          // polyPressure / aftertouch
-          this.voices[action.voice_index].polyPress(note, velocity);
-        } else {
-          this.voices[action.voice_index].noteOn(note, velocity);
-        }
-      },
-      noteOff: (note, velocity) => {
-        const action = this.voiceManager.voiceCheck(note);
-        this.voices[action.voice_index].noteOff();
-      }
+      noteOn: this.noteOn,
+      noteOff: this.noteOff
       // we'll create other handlers later
     };
+  },
+  noteOn: function(note, velocity) {
+    const action = this.voiceManager.voiceCheck(note);
+    if (action.steal) {
+      this.voices[action.voice_index].steal(note, velocity);
+    } else if (action.update) {
+      // polyPressure / aftertouch
+      this.voices[action.voice_index].polyPress(note, velocity);
+    } else {
+      this.voices[action.voice_index].noteOn(note, velocity);
+    }
+  },
+  noteOff: (note, velocity) => {
+    const action = this.voiceManager.voiceCheck(note);
+    this.voices[action.voice_index].noteOff();
   },
 
   /**

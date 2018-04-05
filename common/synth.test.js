@@ -1,10 +1,17 @@
 import { Synth } from "./synth";
 import ctx_mock from "./ctx_mock";
+import { synthVoice } from "./synthVoice";
 
 describe("synth", () => {
   describe("constructor", () => {
     it("missing synthVoice", () => {
       expect(Synth).toThrow();
+    });
+
+    it("common voiceManager used if none provided", () => {
+      const test_synth = new Synth({ ctx: ctx_mock, synthVoice });
+
+      expect(test_synth.voiceManager).not.toBeNull();
     });
   });
 
