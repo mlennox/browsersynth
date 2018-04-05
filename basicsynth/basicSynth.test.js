@@ -1,41 +1,22 @@
 import BasicSynth from "./basicSynth";
+import ctx_mock from "../common/ctx_mock";
 
-let mock_param, mock_ctx, synth, midi, voiceManager_mock;
+let synth, midi, voiceManager_mock;
 
 describe("basic synth", () => {
   beforeAll(() => {
     voiceManager_mock = {};
-    mock_param = {
-      setTargetAtTime: () => {},
-      cancelScheduledValues: () => {},
-      setValueAtTime: () => {},
-      linearRampToValueAtTime: () => {}
-    };
     midi = {
       plugIn: () => {},
       requestAccess: () => {}
     };
-    mock_ctx = {
-      destination: {},
-      createOscillator: () => {
-        return {
-          connect: () => {},
-          frequency: mock_param
-        };
-      },
-      createGain: () => {
-        return {
-          connect: () => {},
-          gain: mock_param
-        };
-      }
-    };
   });
 
   beforeEach(() => {
+    ctx_mock.reset();
     synth = new BasicSynth({
       midi,
-      ctx: mock_ctx,
+      ctx: ctx_mock,
       voiceManager: voiceManager_mock
     });
   });

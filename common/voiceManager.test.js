@@ -1,16 +1,11 @@
 import { VoiceManager } from "./voiceManager";
+import ctx_mock from "./ctx_mock";
 
 describe("voice manager", () => {
-  let vm, ctx_mock;
+  let vm;
 
   beforeEach(() => {
-    ctx_mock = {
-      timestamp: 999,
-      get currentTime() {
-        this.timestamp++;
-        return this.timestamp;
-      }
-    };
+    ctx_mock.reset();
     vm = new VoiceManager({ num_voices: 4, ctx: ctx_mock });
   });
 

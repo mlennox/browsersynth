@@ -1,3 +1,5 @@
+import { param_mock } from "./param_mock";
+
 const ctx_mock = {
   timestamp: 999,
   get currentTime() {
@@ -6,6 +8,19 @@ const ctx_mock = {
   },
   reset: function(timestamp) {
     this.timestamp = timestamp || 999;
+  },
+  destination: {},
+  createOscillator: () => {
+    return {
+      connect: () => {},
+      frequency: param_mock
+    };
+  },
+  createGain: () => {
+    return {
+      connect: () => {},
+      gain: param_mock
+    };
   }
 };
 

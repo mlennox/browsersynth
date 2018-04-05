@@ -2,7 +2,7 @@ it("", () => {});
 
 // import BasicSynth from "./basicSynth";
 
-// let mock_param, mock_ctx, synth, midi, voiceManager_mock;
+// let mock_param, synth, midi, voiceManager_mock;
 
 // describe("basic synth", () => {
 //   beforeAll(() => {
