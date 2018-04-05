@@ -9,6 +9,7 @@ function Synth(options) {
   if (!synthVoice) {
     throw new Error("you must provide a synthVoice");
   }
+  this.synthVoice = synthVoice;
   this.monitor = monitor;
   this.num_voices = num_voices || 4;
   this.voices = [];
@@ -21,15 +22,16 @@ function Synth(options) {
       ctx: this.audioContext,
       num_voices: this.num_voices
     });
-  this.synthVoice = synthVoice.init({ ctx: this.audioContext });
+
+  this.synthVoice.init({ ctx: this.audioContext });
 }
 
 Synth.prototype = {
   init: function() {
     this.voices = [...this.generateVoices(this.ctx)];
     return {
-      noteOn: this.noteOn,
-      noteOff: this.noteOff
+      noteOn: (note, velocity) => this.noteOn(note, velocity),
+      noteOff: () => this.noteOff()
       // we'll create other handlers later
     };
   },
@@ -44,18 +46,18 @@ Synth.prototype = {
       this.voices[action.voice_index].noteOn(note, velocity);
     }
   },
-  noteOff: (note, velocity) => {
+  noteOff: function(note, velocity) {
     const action = this.voiceManager.voiceCheck(note);
     this.voices[action.voice_index].noteOff();
   },
 
-  /**
-   * Well-tempered tuning. We could use Werkmeister or any other experimental tuning
-   */
-  midiNoteToFrequency: function(note) {
-    // https://newt.phys.unsw.edu.au/jw/notes.html
-    return Math.pow(2, (note - 69) / 12) * 440;
-  },
+  // /**
+  //  * Well-tempered tuning. We could use Werkmeister or any other experimental tuning
+  //  */
+  // midiNoteToFrequency: function(note) {
+  //   // https://newt.phys.unsw.edu.au/jw/notes.html
+  //   return Math.pow(2, (note - 69) / 12) * 440;
+  // },
   /**
    * Maybe the voices object should be able to clean up noteOn and noteOff assigning to voice stack?
    * TODO : will need to abstract this out to a module/prototype too, probably

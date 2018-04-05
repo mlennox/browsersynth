@@ -38,8 +38,16 @@ class ExampleSynthVoice {
    * @param {*} velocity
    */
   calculateVelocity(velocity) {
-    return velocity / 127 * 7.9 + 1;
+    return Math.log10(velocity / 127 * 7.9 + 1);
     // a simple liner velocity curve would be : 1.0 * velocity / 127
+  }
+
+  /**
+   * Well-tempered tuning. We could use Werkmeister or any other experimental tuning
+   */
+  midiNoteToFrequency(note) {
+    // https://newt.phys.unsw.edu.au/jw/notes.html
+    return Math.pow(2, (note - 69) / 12) * 440;
   }
 
   /**
@@ -55,34 +63,42 @@ class ExampleSynthVoice {
     volume.connect(this.ctx.destination);
     volume.gain.setValueAtTime(0.0, this.ctx.currentTime);
 
+    const noteOn = (note, velocity) => {
+      const noteFreq = this.midiNoteToFrequency(note);
+      osc1.frequency.cancelScheduledValues(0);
+      osc2.frequency.cancelScheduledValues(0);
+      osc1.frequency.setTargetAtTime(noteFreq, 0, this.portamento);
+      osc2.frequency.setTargetAtTime(noteFreq * 2, 0, this.portamento);
+      volume.gain.cancelScheduledValues(0);
+      volume.gain.setTargetAtTime(
+        this.calculateVelocity(velocity),
+        0,
+        this.envelope.attack
+      );
+    };
+
+    const noteOff = () => {
+      volume.gain.setTargetAtTime(0.0, 0, this.envelope.release);
+    };
+
+    const steal = (note, velocity) => {
+      // TODO : just wait until zero crossing would be better
+      volume.gain.setTargetAtTime(0.0, 0, this.envelope.release);
+      if (velocity) {
+        noteOn(note, velocity);
+      }
+    };
+
+    const polyPress = velocity => {
+      volume.gain.setTargetAtTime(this.calculateVelocity(velocity), 0, 0.0);
+    };
+
     // closure, or make something that returns instances of another class?
     return {
-      noteOn: function(note, velocity) {
-        const noteFreq = this.midiNoteToFrequency(note);
-        osc1.frequency.cancelScheduledValues(0);
-        osc2.frequency.cancelScheduledValues(0);
-        osc1.frequency.setTargetAtTime(noteFreq, 0, this.portamento);
-        osc2.frequency.setTargetAtTime(noteFreq * 2, 0, this.portamento);
-        volume.gain.cancelScheduledValues(0);
-        volume.gain.setTargetAtTime(
-          this.calculateVelocity(velocity),
-          0,
-          this.envelope.attack
-        );
-      },
-      noteOff: function() {
-        volume.gain.setTargetAtTime(0.0, 0, this.envelope.release);
-      },
-      steal: function(note, velocity) {
-        // TODO : just wait until zero crossing would be better
-        volume.gain.setTargetAtTime(0.0, 0, this.envelope.release);
-        if (velocity) {
-          this.noteOn(note, velocity);
-        }
-      },
-      polyPress(velocity) {
-        volume.gain.setTargetAtTime(this.calculateVelocity(velocity), 0, 0.0);
-      }
+      noteOn,
+      noteOff,
+      steal,
+      polyPress
     };
   }
 }
