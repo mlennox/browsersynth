@@ -78,6 +78,8 @@ describe("synth", () => {
       });
     });
 
+    describe("noteOff", () => {});
+
     describe("noteOn", () => {
       beforeEach(() => {
         synth.init();

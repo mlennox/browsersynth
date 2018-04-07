@@ -33,7 +33,6 @@ VoiceManager.prototype = {
       steal: false,
       update: false
     };
-    let update_tracking = false;
     if (
       voice_details.voice_index !== undefined &&
       voice_details.voice_index !== null
@@ -41,8 +40,6 @@ VoiceManager.prototype = {
       // already playing, we'll tell the synth to update the velocity
       voice_details.update = true;
     } else {
-      // we only update tracking if a voice is assigned a new note
-      update_tracking = true;
       // requested note not already playing - take the next free voice
       voice_details.voice_index = this.voice_index_free;
       // if the voice is already playing then we'll tell the synth to 'steal'

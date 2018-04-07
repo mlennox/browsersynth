@@ -13,6 +13,7 @@ describe("voice manager", () => {
     beforeEach(() => {
       vm.voice_index_free = vm.getNextFree(1000);
     });
+
     describe("returned voice details", () => {
       it("voice not already playing same note, free voices", () => {
         const stackBefore = [{ note: 9, time: 900 }, null, undefined, null];
@@ -28,6 +29,24 @@ describe("voice manager", () => {
         const voice_details = vm.voiceCheck(10, 100);
 
         expect(voice_details).toEqual(expected);
+      });
+
+      it("voice not already playing updateVoiceTracking should be called", () => {
+        const stackBefore = [{ note: 9, time: 900 }, null, undefined, null];
+        vm.voice_stack = stackBefore;
+        vm.voice_index_free = 1;
+
+        const expected = {
+          voice_index: 1,
+          steal: false,
+          update: false
+        };
+
+        spyOn(vm, "updateVoiceTracking").and.callThrough();
+
+        vm.voiceCheck(10, 100);
+
+        expect(vm.updateVoiceTracking).toHaveBeenCalledWith(1, 10);
       });
 
       it("voice not already playing same note, no free voices", () => {
@@ -97,6 +116,7 @@ describe("voice manager", () => {
         expect(voice_details).toEqual(expected);
       });
     });
+
     describe("properties", () => {
       it("no voices sounding new voice assigned to lowest available", () => {
         const stackBefore = [null, null, null, null];
@@ -228,6 +248,7 @@ describe("voice manager", () => {
 
       expect(vm.voice_stack).toEqual(stack_before);
     });
+
     it("note to be liberated should be removed from stack", () => {
       const stack_before = [{ note: 12, time: 800 }, { note: 20, time: 910 }];
       const stack_after = [null, { note: 20, time: 910 }];
@@ -238,6 +259,31 @@ describe("voice manager", () => {
       vm.voiceFree(12);
 
       expect(vm.voice_stack).toEqual(stack_after);
+    });
+  });
+
+  describe("updateVoiceTracking", () => {
+    it("voice not already playing updateVoiceTracking should be called", () => {
+      const stackBefore = [{ note: 9, time: 900 }, null, undefined, null];
+      vm.voice_stack = stackBefore;
+      vm.voice_memo = {
+        "9": 0
+      };
+      vm.voice_index_free = 1;
+
+      const stack_after = [
+        { note: 9, time: 900 },
+        { note: 10, time: 1000 },
+        undefined,
+        null
+      ];
+
+      const memo_after = { "9": 0, "10": 1 };
+
+      vm.updateVoiceTracking(vm.voice_index_free, 10);
+
+      expect(vm.voice_stack).toEqual(stack_after);
+      expect(vm.voice_memo).toEqual(memo_after);
     });
   });
 });

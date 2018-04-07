@@ -31,7 +31,7 @@ Synth.prototype = {
     this.voices = [...this.generateVoices(this.ctx)];
     return {
       noteOn: (note, velocity) => this.noteOn(note, velocity),
-      noteOff: () => this.noteOff()
+      noteOff: note => this.noteOff(note)
       // we'll create other handlers later
     };
   },
@@ -49,21 +49,10 @@ Synth.prototype = {
   },
   noteOff: function(note, velocity) {
     const action = this.voiceManager.voiceCheck(note);
-    this.voices[action.voice_index].noteOff();
     this.voiceManager.voiceFree(note);
+    this.voices[action.voice_index].noteOff();
   },
 
-  // /**
-  //  * Well-tempered tuning. We could use Werkmeister or any other experimental tuning
-  //  */
-  // midiNoteToFrequency: function(note) {
-  //   // https://newt.phys.unsw.edu.au/jw/notes.html
-  //   return Math.pow(2, (note - 69) / 12) * 440;
-  // },
-  /**
-   * Maybe the voices object should be able to clean up noteOn and noteOff assigning to voice stack?
-   * TODO : will need to abstract this out to a module/prototype too, probably
-   */
   generateVoices: function*(ctx) {
     let voice_count = 0;
     while (voice_count < this.num_voices) {
