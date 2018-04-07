@@ -78,6 +78,16 @@ describe("synth", () => {
       });
     });
 
+    describe("generateVoices", () => {
+      it("synthVoice.generate will be called", () => {
+        spyOn(synthVoice_mock, "generate").and.callThrough();
+
+        const result = [...synth.generateVoices()];
+
+        expect(synthVoice_mock.generate).toHaveBeenCalled();
+      });
+    });
+
     describe("noteOff", () => {});
 
     describe("noteOn", () => {

@@ -28,7 +28,7 @@ function Synth(options) {
 
 Synth.prototype = {
   init: function() {
-    this.voices = [...this.generateVoices(this.ctx)];
+    this.voices = [...this.generateVoices()];
     return {
       noteOn: (note, velocity) => this.noteOn(note, velocity),
       noteOff: note => this.noteOff(note)
@@ -53,7 +53,7 @@ Synth.prototype = {
     this.voices[action.voice_index].noteOff();
   },
 
-  generateVoices: function*(ctx) {
+  generateVoices: function*() {
     let voice_count = 0;
     while (voice_count < this.num_voices) {
       voice_count++;
