@@ -10,10 +10,10 @@ class ExampleSynthVoice {
     // ADSR envelope - sustain is a volume level not time like the other parameters
     // NOTE : this is not really used fully yet
     this.envelope = {
-      attack: 0,
+      attack: 0.01,
       decay: 0.01,
       sustain: 0.5, // we'll use this as a multiplier of peak volume - only multiplies up to max velocity!
-      release: 0.1
+      release: 0.5
     };
     this.portamento = 0.0;
 
@@ -38,7 +38,7 @@ class ExampleSynthVoice {
    * @param {*} velocity
    */
   calculateVelocity(velocity) {
-    return 1.0 * velocity / 127;
+    return 5.0 * velocity / 127;
     // return Math.log10(velocity / 127 * 7.9 + 1);
     // a simple liner velocity curve would be : 1.0 * velocity / 127
   }
@@ -56,14 +56,27 @@ class ExampleSynthVoice {
    */
   generate() {
     const osc1 = this.ctx.createOscillator();
+    osc1.type = "triangle";
     const osc2 = this.ctx.createOscillator();
     const volume = this.ctx.createGain();
 
+    // use another osc for some FM
+    const modOsc1 = this.ctx.createOscillator();
+    modOsc1.type = "sawtooth";
+    const modVolume = this.ctx.createGain();
+
     osc1.connect(volume);
     osc2.connect(volume);
+
+    modOsc1.connect(modVolume);
+    modVolume.connect(osc1.frequency);
+    // modOsc1.frequency.setValueAtTime(, this.ctx.currentTime);
+    // modVolume.gain.setValueAtTime(100, this.ctx.currentTime);
+
     volume.connect(this.ctx.destination);
     volume.gain.setValueAtTime(0.0, this.ctx.currentTime);
     osc1.start();
+    modOsc1.start();
     osc2.start();
 
     const noteOn = (note, velocity) => {
@@ -81,6 +94,9 @@ class ExampleSynthVoice {
         0,
         this.envelope.attack
       );
+
+      modOsc1.frequency.setValueAtTime(noteFreq * 1.5, this.ctx.currentTime);
+      modVolume.gain.setValueAtTime(100, this.ctx.currentTime);
     };
 
     const noteOff = () => {

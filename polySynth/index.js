@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let midi = new MIDI({
       channels: {
         "1": new Synth({
+          num_voices: 8,
           monitor: new Monitor(),
           synthVoice: new ExampleSynthVoice()
         })
