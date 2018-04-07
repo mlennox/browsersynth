@@ -1,6 +1,6 @@
-function synthVoice_mock() {}
+function SynthVoice_mock() {}
 
-synthVoice_mock.prototype = {
+SynthVoice_mock.prototype = {
   init: () => {},
   calculateVelocity: () => {},
   midiNoteToFrequency: () => {},
@@ -13,5 +13,7 @@ synthVoice_mock.prototype = {
     };
   }
 };
+
+const synthVoice_mock = new SynthVoice_mock();
 
 export { synthVoice_mock };

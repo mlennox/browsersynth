@@ -9,7 +9,10 @@ describe("synth", () => {
     });
 
     it("common voiceManager used if none provided", () => {
-      const test_synth = new Synth({ ctx: ctx_mock, synthVoice_mock });
+      const test_synth = new Synth({
+        ctx: ctx_mock,
+        synthVoice: synthVoice_mock
+      });
 
       expect(test_synth.voiceManager).not.toBeNull();
     });
