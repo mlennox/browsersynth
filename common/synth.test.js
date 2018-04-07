@@ -132,7 +132,26 @@ describe("synth", () => {
         });
       });
 
-      describe("action : update", () => {});
+      describe("action : update", () => {
+        it("voice chosen by voice manager is updated", () => {
+          const played_note = 100;
+          const played_velocity = 108;
+
+          spyOn(voiceManager_mock, "voiceCheck").and.returnValue({
+            steal: false,
+            update: true,
+            voice_index: 0
+          });
+          spyOn(synth.voices[0], "polyPress").and.callThrough();
+
+          synth.noteOn(played_note, played_velocity);
+
+          expect(synth.voices[0].polyPress).toHaveBeenCalledWith(
+            played_note,
+            played_velocity
+          );
+        });
+      });
     });
   });
 });
