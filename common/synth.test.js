@@ -38,13 +38,26 @@ describe("synth", () => {
   });
 
   describe("others", () => {
-    let synth;
+    let synth, voiceManager_mock;
 
     beforeEach(() => {
+      voiceManager_mock = {
+        voiceCheck: () => {
+          return {
+            steal: false,
+            update: false,
+            voice_index: 0
+          };
+        },
+        voiceFree: () => {},
+        updateVoiceTracking: () => {},
+        getNextFree: () => {}
+      };
       ctx_mock.reset();
       synth = new Synth({
         synthVoice: synthVoice_mock,
-        ctx: ctx_mock
+        ctx: ctx_mock,
+        voiceManager: voiceManager_mock
       });
     });
 
@@ -63,6 +76,63 @@ describe("synth", () => {
         expect(result.hasOwnProperty("noteOn")).toBeTruthy();
         expect(result.hasOwnProperty("noteOff")).toBeTruthy();
       });
+    });
+
+    describe("noteOn", () => {
+      beforeEach(() => {
+        synth.init();
+      });
+
+      it("voiceManager voiceCheck called", () => {
+        const played_note = 100;
+        const played_velocity = 108;
+
+        spyOn(voiceManager_mock, "voiceCheck").and.callThrough();
+
+        synth.noteOn(played_note, played_velocity);
+
+        expect(voiceManager_mock.voiceCheck).toHaveBeenCalledWith(played_note);
+      });
+
+      describe("action : normal", () => {
+        // this.voices[action.voice_index].noteOn(note, velocity);
+        it("voice chosen by voice manager should play note", () => {
+          const played_note = 100;
+          const played_velocity = 108;
+
+          spyOn(synth.voices[0], "noteOn").and.callThrough();
+
+          synth.noteOn(played_note, played_velocity);
+
+          expect(synth.voices[0].noteOn).toHaveBeenCalledWith(
+            played_note,
+            played_velocity
+          );
+        });
+      });
+
+      describe("action : steal", () => {
+        it("voice chosen by voice manager is stolen by new note", () => {
+          const played_note = 100;
+          const played_velocity = 108;
+
+          spyOn(voiceManager_mock, "voiceCheck").and.returnValue({
+            steal: true,
+            update: false,
+            voice_index: 0
+          });
+          spyOn(synth.voices[0], "steal").and.callThrough();
+
+          synth.noteOn(played_note, played_velocity);
+
+          expect(synth.voices[0].steal).toHaveBeenCalledWith(
+            played_note,
+            played_velocity
+          );
+        });
+      });
+
+      describe("action : update", () => {});
     });
   });
 });
