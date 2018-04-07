@@ -10,7 +10,7 @@ class ExampleSynthVoice {
     // ADSR envelope - sustain is a volume level not time like the other parameters
     // NOTE : this is not really used fully yet
     this.envelope = {
-      attack: 0.01,
+      attack: 0,
       decay: 0.01,
       sustain: 0.5, // we'll use this as a multiplier of peak volume - only multiplies up to max velocity!
       release: 0.1
@@ -63,6 +63,8 @@ class ExampleSynthVoice {
     osc2.connect(volume);
     volume.connect(this.ctx.destination);
     volume.gain.setValueAtTime(0.0, this.ctx.currentTime);
+    osc1.start();
+    osc2.start();
 
     const noteOn = (note, velocity) => {
       const noteFreq = this.midiNoteToFrequency(note);
@@ -71,8 +73,11 @@ class ExampleSynthVoice {
       osc1.frequency.setTargetAtTime(noteFreq, 0, this.portamento);
       osc2.frequency.setTargetAtTime(noteFreq * 2, 0, this.portamento);
       volume.gain.cancelScheduledValues(0);
+      const noteVolume = this.calculateVelocity(velocity);
+      console.log("note volume", noteVolume);
+      // TODO : create a proper ADSR curve using setValueCurveAtTime?
       volume.gain.setTargetAtTime(
-        this.calculateVelocity(velocity),
+        this.calculateVelocity(noteVolume),
         0,
         this.envelope.attack
       );
@@ -91,7 +96,7 @@ class ExampleSynthVoice {
     };
 
     const polyPress = velocity => {
-      volume.gain.setTargetAtTime(this.calculateVelocity(velocity), 0, 0.0);
+      volume.gain.setTargetAtTime(this.calculateVelocity(velocity), 0, 0);
     };
 
     // closure, or make something that returns instances of another class?

@@ -37,6 +37,7 @@ Synth.prototype = {
   },
   noteOn: function(note, velocity) {
     const action = this.voiceManager.voiceCheck(note);
+    console.log("action", action);
     if (action.steal) {
       this.voices[action.voice_index].steal(note, velocity);
     } else if (action.update) {
