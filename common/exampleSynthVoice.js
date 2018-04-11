@@ -45,9 +45,13 @@ class ExampleSynthVoice {
 
   /**
    * Well-tempered tuning. We could use Werkmeister or any other experimental tuning
+   * for details on how to derive this formula see
+   *  http://www.webpusher.ie/2018/04/08/synth-basics/
    */
   midiNoteToFrequency(note) {
-    // https://newt.phys.unsw.edu.au/jw/notes.html
+    // NOTE - if speed is an issue we could calculate the frequency
+    // for each MIDI note, turn it into JSON
+    // and load it into an associative array at start up
     return Math.pow(2, (note - 69) / 12) * 440;
   }
 
